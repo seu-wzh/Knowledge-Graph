@@ -19,13 +19,14 @@ class KnowledgeBase(object):
 
     def entity_link(self, mention:str, distance) -> tuple[Node, float]:
         matcher = NodeMatcher(self.graph)
-        nodes   = matcher.match('Medicine').all()
-        if len(nodes) == 0:
+        if not hasattr(self, 'nodes'):
+            self.nodes = matcher.match('Medicine').all()
+        if len(self.nodes) == 0:
             return None, float('-inf')
         measure = lambda n: distance(n, mention)
-        strsim  = [measure(node['label']) for node in nodes]
+        strsim  = [measure(node['label']) for node in self.nodes]
         index   = np.argmax(strsim)
-        return nodes[index], strsim[index]
+        return self.nodes[index], strsim[index]
 
     def clear_node(self, type:str) -> None:
         cypher = f'MATCH (n:{type}) DETACH DELETE n'
